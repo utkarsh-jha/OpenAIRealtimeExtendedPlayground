@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure OpenAI Realtime API Playground</title>
+    <link rel="stylesheet" href="public/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - Setup -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <h2>Setup</h2>
+                <!-- <button class="hide-btn" id="hideBtn">Hide</button> -->
+            </div>
+
+            <!-- Configuration Section -->
+            <div class="config-section">
+                <div class="config-header" id="configHeader">
+                    <span class="config-title">API Configuration</span>
+                    <span class="config-toggle" id="configToggle">▼</span>
+                </div>
+                <div class="config-content" id="configContent">
+                    <div class="config-group">
+                        <label for="sessionUrl">Session URL</label>
+                        <input type="text" id="sessionUrl" value="https://ai-rmaguyhub553390411579.openai.azure.com/openai/realtimeapi/sessions?api-version=2025-04-01-preview">
+                    </div>
+                    <div class="config-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" value="">
+                    </div>
+                    <div class="config-group">
+                        <label for="webrtcUrl">WebRTC URL</label>
+                        <input type="text" id="webrtcUrl" value="https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configure Session Section -->
+            <div class="config-section">
+                <div class="config-header" id="sessionConfigHeader">
+                    <span class="config-title">Configure Session</span>
+                    <span class="config-toggle" id="sessionConfigToggle">▼</span>
+                </div>
+                <div class="config-content show" id="sessionConfigContent">
+                    
+                    <!-- Model Selection -->
+                    <div class="config-group">
+                        <label for="modelSelect">Model</label>
+                        <select id="modelSelect">
+                            <option value="gpt-4o-realtime-preview">gpt-4o-realtime-preview</option>
+                        </select>
+                    </div>
+
+                    <!-- Voice Selection -->
+                    <div class="config-group">
+                        <label for="voiceSelect">Voice</label>
+                        <select id="voiceSelect">
+                            <option value="alloy">Alloy</option>
+                            <option value="ash">Ash</option>
+                            <option value="ballad">Ballad</option>
+                            <option value="coral">Coral</option>
+                            <option value="echo">Echo</option>
+                            <option value="sage">Sage</option>
+                            <option value="shimmer">Shimmer</option>
+                            <option value="verse" selected>Verse</option>
+                        </select>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="config-group">
+                        <label for="modelInstructions">Instructions</label>
+                        <textarea id="modelInstructions" placeholder="Your knowledge cutoff is 2023-10. You are a helpful, witty, and friendly AI..."></textarea>
+                    </div>
+
+                    <!-- Audio Configuration -->
+                    <div class="config-subsection">
+                        <h4>Audio Configuration</h4>
+                        
+                        <div class="config-group">
+                            <label for="inputAudioFormat">Input Audio Format</label>
+                            <select id="inputAudioFormat">
+                                <option value="pcm16" selected>PCM16 (24kHz, 16-bit, mono)</option>
+                                <option value="g711_ulaw">G.711 μ-law</option>
+                                <option value="g711_alaw">G.711 A-law</option>
+                            </select>
+                        </div>
+
+                        <div class="config-group">
+                            <label for="outputAudioFormat">Output Audio Format</label>
+                            <select id="outputAudioFormat">
+                                <option value="pcm16" selected>PCM16 (24kHz)</option>
+                                <option value="g711_ulaw">G.711 μ-law</option>
+                                <option value="g711_alaw">G.711 A-law</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Turn Detection Configuration -->
+                    <div class="config-subsection">
+                        <h4>Turn Detection</h4>
+                        
+                        <div class="config-group">
+                            <label for="turnDetectionType">Type</label>
+                            <select id="turnDetectionType">
+                                <option value="server_vad" selected>Server VAD</option>
+                                <option value="semantic_vad">Semantic VAD</option>
+                                <!-- <option value="none">None (Manual)</option> -->
+                            </select>
+                        </div>
+
+                        <!-- Server VAD Options -->
+                        <div id="serverVadOptions" class="vad-options">
+                            <div class="config-group">
+                                <label for="thresholdSlider">Threshold</label>
+                                <div class="slider-container">
+                                    <input type="range" id="thresholdSlider" min="0" max="1" step="0.1" value="0.5">
+                                    <span class="slider-value" id="thresholdValue">0.5</span>
+                                </div>
+                            </div>
+
+                            <div class="config-group">
+                                <label for="prefixPaddingSlider">Prefix Padding (ms)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="prefixPaddingSlider" min="0" max="1000" step="50" value="300">
+                                    <span class="slider-value" id="prefixPaddingValue">300</span>
+                                </div>
+                            </div>
+
+                            <div class="config-group">
+                                <label for="silenceDurationSlider">Silence Duration (ms)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="silenceDurationSlider" min="100" max="2000" step="100" value="500">
+                                    <span class="slider-value" id="silenceDurationValue">500</span>
+                                </div>
+                            </div>
+
+                            <div class="config-group">
+                                <label>
+                                    <input type="checkbox" id="createResponse" checked>
+                                    Automatically generate response on VAD stop
+                                </label>
+                            </div>
+
+                            <div class="config-group">
+                                <label>
+                                    <input type="checkbox" id="interruptResponse" checked>
+                                    Interrupt ongoing response on VAD start
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Semantic VAD Options -->
+                        <div id="semanticVadOptions" class="vad-options" style="display: none;">
+                            <div class="config-group">
+                                <label for="semanticEagerness">Eagerness</label>
+                                <select id="semanticEagerness">
+                                    <option value="low">Low (wait longer)</option>
+                                    <option value="auto" selected>Auto (medium)</option>
+                                    <option value="high">High (respond quickly)</option>
+                                </select>
+                            </div>
+
+                            <div class="config-group">
+                                <label>
+                                    <input type="checkbox" id="semanticCreateResponse" checked>
+                                    Automatically generate response on VAD stop
+                                </label>
+                            </div>
+
+                            <div class="config-group">
+                                <label>
+                                    <input type="checkbox" id="semanticInterruptResponse" checked>
+                                    Interrupt ongoing response on VAD start
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Parameters -->
+                    <div class="config-subsection">
+                        <h4>Model Parameters</h4>
+                        
+                        <div class="config-group">
+                            <label for="temperatureSlider">Temperature</label>
+                            <div class="slider-container">
+                                <input type="range" id="temperatureSlider" min="0.6" max="1.2" step="0.1" value="0.8">
+                                <span class="slider-value" id="temperatureValue">0.8</span>
+                            </div>
+                        </div>
+
+                        <div class="config-group">
+                            <label for="maxTokens">Max Response Tokens</label>
+                            <select id="maxTokens">
+                                <option value="inf" selected>Unlimited</option>
+                                <option value="1024">1024</option>
+                                <option value="2048">2048</option>
+                                <option value="4096">4096</option>
+                            </select>
+                        </div>
+
+                        <div class="config-group">
+                            <label for="modalities">Response Modalities</label>
+                            <select id="modalities">
+                                <option value="text,audio" selected>Text + Audio</option>
+                                <option value="text">Text Only</option>
+                                <option value="audio">Audio Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Options -->
+                    <div class="config-subsection">
+                        <h4>Advanced</h4>
+                        
+                        <div class="config-group">
+                            <label>
+                                <input type="checkbox" id="enableNoiseReduction" checked>
+                                Enable Input Audio Noise Reduction
+                            </label>
+                        </div>
+
+                        <div class="config-group" id="noiseReductionTypeGroup" style="display: block;">
+                            <label for="noiseReductionType">Noise Reduction Type</label>
+                            <select id="noiseReductionType">
+                                <option value="near_field" selected>Near Field (headphones, close microphones)</option>
+                                <option value="far_field">Far Field (laptop, conference room microphones)</option>
+                            </select>
+                        </div>
+
+                        <div class="config-group">
+                            <label>
+                                <input type="checkbox" id="enableTranscription">
+                                Enable Input Audio Transcription
+                            </label>
+                        </div>
+
+                        <div class="config-group" id="transcriptionConfigGroup" style="display: none;">
+                            <div class="config-group">
+                                <label for="transcriptionModel">Transcription Model</label>
+                                <select id="transcriptionModel">
+                                    <option value="gpt-4o-transcribe" selected>GPT-4o Transcribe</option>
+                                    <option value="gpt-4o-mini-transcribe">GPT-4o Mini Transcribe</option>
+                                    <option value="whisper-1">Whisper-1</option>
+                                </select>
+                            </div>
+
+                            <div class="config-group">
+                                <label for="transcriptionLanguage">Language (ISO-639-1)</label>
+                                <select id="transcriptionLanguage">
+                                    <option value="">Auto-detect</option>
+                                    <option value="en">English (en)</option>
+                                    <option value="es">Spanish (es)</option>
+                                    <option value="fr">French (fr)</option>
+                                    <option value="de">German (de)</option>
+                                    <option value="zh">Chinese (zh)</option>
+                                    <option value="ja">Japanese (ja)</option>
+                                    <option value="ko">Korean (ko)</option>
+                                    <option value="pt">Portuguese (pt)</option>
+                                    <option value="ru">Russian (ru)</option>
+                                    <option value="ar">Arabic (ar)</option>
+                                </select>
+                            </div>
+
+                            <div class="config-group">
+                                <label for="transcriptionPrompt">Transcription Prompt</label>
+                                <textarea id="transcriptionPrompt" placeholder="For GPT-4o models: free text guide (e.g., 'expect words related to technology'). For Whisper-1: keywords list" rows="3"></textarea>
+                                <div class="config-help-text">
+                                    <small>GPT-4o models: Free text guidance. Whisper-1: List of keywords.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Conversation -->
+        <div class="right-panel">
+            <div class="conversation-header">
+                <h2>Conversation</h2>
+            </div>
+            
+            <div class="conversation-content">
+                <div class="conversation-placeholder" id="conversationPlaceholder">
+                    <div class="audio-icon">🎵</div>
+                    <h3>Just say the word!</h3>
+                    <p>Try speaking out loud, just like you'd converse with a real person, and hear the responses you get back.</p>
+                </div>
+                
+                <!-- Chat Messages Container -->
+                <div class="chat-container" id="chatContainer" style="display: none;">
+                    <div class="chat-messages" id="chatMessages"></div>
+                </div>
+            </div>
+
+            <!-- Audio Permission Notice -->
+            <div class="audio-notice" id="audioNotice">
+                <div class="notice-content">
+                    <span class="notice-icon">ℹ️</span>
+                    <span>No audio device available. To use real-time audio you need to allow your browser to access your microphone.</span>
+                    <button class="enable-microphone-btn" id="enableMicrophoneBtn">Enable microphone</button>
+                    <button class="close-notice-btn" id="closeNoticeBtn">×</button>
+                </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span class="status-text" id="statusText">Disconnected</span>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="control-buttons">
+                <button class="start-session-btn" id="startSessionBtn">Start Session</button>
+                <button class="stop-session-btn" id="stopSessionBtn" style="display: none;">Stop Session</button>
+            </div>
+
+            <!-- Log Container -->
+            <div class="log-container" id="logContainer"></div>
+        </div>
+    </div>
+
+    <!-- Audio element for playback -->
+    <audio id="audioElement" autoplay></audio> 
+
+    <!-- Scripts -->
+    <script src="public/dom-handler.js"></script>
+    <script src="public/websocket-handler.js"></script>
+</body>
+</html>
