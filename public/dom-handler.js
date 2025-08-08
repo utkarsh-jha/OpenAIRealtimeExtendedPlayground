@@ -70,6 +70,12 @@ class DOMHandler {
             startSessionBtn: document.getElementById('startSessionBtn'),
             stopSessionBtn: document.getElementById('stopSessionBtn'),
             
+            // Timer elements
+            sessionTimer: document.getElementById('sessionTimer'),
+            timerText: document.getElementById('timerText'),
+            timerProgressBar: document.getElementById('timerProgressBar'),
+            extendTimerBtn: document.getElementById('extendTimerBtn'),
+            
             // Other elements
             logContainer: document.getElementById('logContainer'),
             audioElement: document.getElementById('audioElement'),
@@ -83,6 +89,12 @@ class DOMHandler {
         this.initializeEventListeners();
         this.initializeSliders();
         this.setDefaultValues();
+        
+        // Timer variables
+        this.sessionTimerInterval = null;
+        this.sessionStartTime = null;
+        this.sessionDuration = 2 * 60 * 1000; // 2 minutes in milliseconds
+        this.isSessionActive = false;
     }
     
     initializeEventListeners() {
@@ -109,6 +121,9 @@ class DOMHandler {
         // Session controls
         this.elements.startSessionBtn.addEventListener('click', () => this.startSession());
         this.elements.stopSessionBtn.addEventListener('click', () => this.stopSession());
+        
+        // Timer controls
+        this.elements.extendTimerBtn.addEventListener('click', () => this.extendSession());
         
         // Voice selection change
         this.elements.voiceSelect.addEventListener('change', (e) => this.onVoiceChange(e.target.value));
@@ -253,8 +268,12 @@ class DOMHandler {
         // Update UI
         this.elements.startSessionBtn.style.display = 'none';
         this.elements.stopSessionBtn.style.display = 'inline-block';
+        this.elements.sessionTimer.style.display = 'flex';
         this.updateConnectionStatus('connecting', 'Connecting...');
         this.showLogContainer();
+        
+        // Start session timer
+        this.startSessionTimer();
         
         // Disable configuration fields immediately when starting session
         this.disableConfigurationFields();
@@ -269,7 +288,12 @@ class DOMHandler {
         // Update UI
         this.elements.startSessionBtn.style.display = 'inline-block';
         this.elements.stopSessionBtn.style.display = 'none';
+        this.elements.sessionTimer.style.display = 'none';
+        this.elements.extendTimerBtn.style.display = 'none';
         this.updateConnectionStatus('', 'Disconnected');
+        
+        // Stop session timer
+        this.stopSessionTimer();
         
         // Enable configuration fields when stopping session
         this.enableConfigurationFields();
@@ -541,6 +565,91 @@ class DOMHandler {
         });
         
         this.logMessage('Configuration fields enabled');
+    }
+    
+    // Session Timer Methods
+    startSessionTimer() {
+        this.sessionStartTime = Date.now();
+        this.isSessionActive = true;
+        this.elements.extendTimerBtn.style.display = 'none';
+        this.updateTimerDisplay();
+        
+        // Update timer every second
+        this.sessionTimerInterval = setInterval(() => {
+            this.updateTimerDisplay();
+        }, 1000);
+        
+        this.logMessage('Session timer started (2 minutes)');
+    }
+    
+    stopSessionTimer() {
+        if (this.sessionTimerInterval) {
+            clearInterval(this.sessionTimerInterval);
+            this.sessionTimerInterval = null;
+        }
+        this.isSessionActive = false;
+        this.resetTimerDisplay();
+        this.logMessage('Session timer stopped');
+    }
+    
+    updateTimerDisplay() {
+        if (!this.isSessionActive || !this.sessionStartTime) return;
+        
+        const elapsed = Date.now() - this.sessionStartTime;
+        const remaining = Math.max(0, this.sessionDuration - elapsed);
+        const totalSeconds = Math.ceil(remaining / 1000);
+        
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        // Update timer text
+        this.elements.timerText.textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Update progress bar
+        const progress = ((this.sessionDuration - remaining) / this.sessionDuration) * 100;
+        this.elements.timerProgressBar.style.width = `${progress}%`;
+        
+        // Update colors based on remaining time
+        this.elements.timerText.className = 'timer-text';
+        this.elements.timerProgressBar.className = 'timer-progress-bar';
+        
+        if (remaining <= 30000) { // Last 30 seconds - critical
+            this.elements.timerText.classList.add('critical');
+            this.elements.timerProgressBar.classList.add('critical');
+        } else if (remaining <= 60000) { // Last minute - warning
+            this.elements.timerText.classList.add('warning');
+            this.elements.timerProgressBar.classList.add('warning');
+        }
+        
+        // Show extend button in last 30 seconds
+        if (remaining <= 30000 && remaining > 0) {
+            this.elements.extendTimerBtn.style.display = 'inline-block';
+        }
+        
+        // Auto-terminate when time runs out
+        if (remaining <= 0) {
+            this.logMessage('Session time expired - automatically terminating session');
+            this.stopSession();
+        }
+    }
+    
+    resetTimerDisplay() {
+        this.elements.timerText.textContent = '02:00';
+        this.elements.timerProgressBar.style.width = '0%';
+        this.elements.timerText.className = 'timer-text';
+        this.elements.timerProgressBar.className = 'timer-progress-bar';
+        this.elements.extendTimerBtn.style.display = 'none';
+    }
+    
+    extendSession() {
+        // Add 2 more minutes to the session
+        this.sessionDuration += 2 * 60 * 1000; // Add 2 minutes
+        this.elements.extendTimerBtn.style.display = 'none';
+        this.logMessage('Session extended by 2 minutes');
+        
+        // Update display immediately
+        this.updateTimerDisplay();
     }
     
     // Test function to manually add transcripts for debugging

@@ -280,6 +280,22 @@
         <div class="right-panel">
             <div class="conversation-header">
                 <h2>Conversation</h2>
+                
+                <!-- Session Timer and Controls -->
+                <div class="session-controls-top">
+                    <button class="start-session-btn" id="startSessionBtn">Start Session</button>
+                    <button class="stop-session-btn" id="stopSessionBtn" style="display: none;">Stop Session</button>
+                    
+                    <div class="session-timer" id="sessionTimer" style="display: none;">
+                        <div class="timer-display">
+                            <span class="timer-text" id="timerText">02:00</span>
+                            <div class="timer-progress">
+                                <div class="timer-progress-bar" id="timerProgressBar"></div>
+                            </div>
+                        </div>
+                        <button class="extend-timer-btn" id="extendTimerBtn" style="display: none;">Extend 2 min</button>
+                    </div>
+                </div>
             </div>
             
             <div class="conversation-content">
@@ -309,12 +325,6 @@
             <div class="connection-status" id="connectionStatus">
                 <span class="status-indicator" id="statusIndicator"></span>
                 <span class="status-text" id="statusText">Disconnected</span>
-            </div>
-
-            <!-- Control Buttons -->
-            <div class="control-buttons">
-                <button class="start-session-btn" id="startSessionBtn">Start Session</button>
-                <button class="stop-session-btn" id="stopSessionBtn" style="display: none;">Stop Session</button>
             </div>
 
             <!-- Log Container -->

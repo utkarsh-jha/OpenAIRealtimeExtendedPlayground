@@ -53,6 +53,8 @@ class WebSocketHandler {
             max_response_output_tokens: this.currentConfig.max_response_output_tokens,
             modalities: this.currentConfig.modalities
         };
+
+        console.log(sessionPayload)
         
         // Add turn detection configuration
         if (this.currentConfig.turn_detection_type && this.currentConfig.turn_detection_type !== 'none') {
@@ -85,9 +87,7 @@ class WebSocketHandler {
             sessionPayload.input_audio_transcription = this.currentConfig.input_audio_transcription;
         }
 
-        // print current config in console
-        //console.log('Current session configuration:', JSON.stringify(sessionPayload, null, 2));
-        
+
         const response = await fetch(this.currentConfig.sessionUrl, {
             method: "POST",
             headers: {

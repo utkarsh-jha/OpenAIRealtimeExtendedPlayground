@@ -41,7 +41,11 @@
                     },
                     body: JSON.stringify({
                         model: DEPLOYMENT,
-                        voice: VOICE
+                        voice: VOICE,
+                        turn_detection: {
+                            type: "semantic_vad",
+                            interrupt_response: false
+                        },
                     })
                 });
 
